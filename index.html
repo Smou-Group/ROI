@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SMOU GROUP | عرض الاستحواذ الاستثماري</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+:root{
+  --navy-deep:#050b16;
+  --navy:#0a1728;
+  --navy-2:#0f2138;
+  --sky:#3fb6ff;
+  --sky-2:#7fd4ff;
+  --gold:#d9b46a;
+  --white:#f4f8fc;
+  --mist:rgba(244,248,252,0.62);
+  --glass:rgba(255,255,255,0.045);
+  --glass-brd:rgba(127,212,255,0.16);
+  --up:#57d9a3;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--navy-deep);
+  color:var(--white);
+  font-family:'Tajawal',sans-serif;
+  overflow-x:hidden;
+  position:relative;
+}
+.num{font-family:'JetBrains Mono',monospace;}
+
+/* ambient background */
+.bg-glow{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+   radial-gradient(circle at 15% 8%, rgba(63,182,255,0.14), transparent 40%),
+   radial-gradient(circle at 85% 20%, rgba(217,180,106,0.08), transparent 35%),
+   radial-gradient(circle at 50% 90%, rgba(63,182,255,0.10), transparent 45%);
+}
+.grid-lines{position:fixed;inset:0;z-index:0;opacity:0.35;pointer-events:none;
+  background-image:linear-gradient(rgba(127,212,255,0.035) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(127,212,255,0.035) 1px, transparent 1px);
+  background-size:52px 52px;
+}
+
+section{position:relative;z-index:1;padding:120px 8vw;max-width:1400px;margin:0 auto;}
+@media (max-width:800px){section{padding:80px 6vw;}}
+
+/* ---------- floor indicator (signature nav) ---------- */
+.floor-nav{
+  position:fixed;left:26px;top:50%;transform:translateY(-50%);
+  z-index:50;display:flex;flex-direction:column;align-items:center;gap:0;
+}
+.floor-nav .shaft{width:1px;height:100%;position:absolute;background:linear-gradient(var(--glass-brd),transparent);}
+.floor-btn{
+  width:38px;height:38px;border-radius:8px;margin:5px 0;
+  border:1px solid var(--glass-brd);background:rgba(10,23,40,0.6);
+  backdrop-filter:blur(6px);
+  color:var(--mist);font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  transition:all .35s ease;position:relative;
+}
+.floor-btn:hover{border-color:var(--sky);color:var(--sky-2);}
+.floor-btn.active{background:var(--sky);color:var(--navy-deep);border-color:var(--sky);
+  box-shadow:0 0 18px rgba(63,182,255,0.55);}
+@media (max-width:900px){.floor-nav{display:none;}}
+
+/* ---------- hero / elevator doors ---------- */
+.hero{
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;position:relative;padding:0 6vw;overflow:hidden;
+}
+.door{position:fixed;top:0;bottom:0;width:50%;background:linear-gradient(180deg,#0c1a2e,#050b16);
+  z-index:40;display:flex;align-items:center;justify-content:center;}
+.door-left{left:0;border-left:2px solid rgba(63,182,255,0.25);}
+.door-right{right:0;border-right:2px solid rgba(63,182,255,0.25);}
+.door::after{content:"";position:absolute;top:0;bottom:0;width:3px;background:linear-gradient(180deg,transparent,var(--sky),transparent);}
+.door-left::after{right:0;}
+.door-right::after{left:0;}
+.door-left{animation:openLeft 1.6s 0.3s cubic-bezier(.77,0,.18,1) forwards;}
+.door-right{animation:openRight 1.6s 0.3s cubic-bezier(.77,0,.18,1) forwards;}
+@keyframes openLeft{to{transform:translateX(-101%);}}
+@keyframes openRight{to{transform:translateX(101%);}}
+
+.eyebrow{
+  font-family:'JetBrains Mono',monospace;letter-spacing:.35em;font-size:11px;
+  color:var(--sky-2);text-transform:uppercase;margin-bottom:22px;opacity:0;
+  animation:rise .9s 1.7s forwards;
+}
+.hero h1{
+  font-size:clamp(46px,8vw,110px);font-weight:900;line-height:0.98;
+  background:linear-gradient(180deg,#ffffff 20%, #b9dcf5 65%, #3fb6ff 120%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  opacity:0;animation:rise 1s 1.9s forwards;
+}
+.hero .tagline{margin-top:22px;font-size:clamp(15px,2vw,20px);color:var(--mist);font-weight:400;
+  opacity:0;animation:rise 1s 2.15s forwards;}
+.hero .divider-word{margin-top:8px;font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:.2em;color:var(--gold);
+  opacity:0;animation:rise 1s 2.3s forwards;}
+@keyframes rise{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
+
+.hero-stats{
+  display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:56px;
+  opacity:0;animation:rise 1s 2.5s forwards;
+}
+.hstat{
+  padding:16px 26px;border-radius:14px;background:var(--glass);
+  border:1px solid var(--glass-brd);backdrop-filter:blur(14px);min-width:130px;
+}
+.hstat .n{font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:700;color:var(--sky-2);}
+.hstat .l{font-size:12px;color:var(--mist);margin-top:4px;}
+
+.scroll-cue{position:absolute;bottom:36px;left:50%;transform:translateX(-50%);
+  opacity:0;animation:rise 1s 2.8s forwards, bob 2.2s 3.8s infinite;
+  font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.3em;color:var(--mist);}
+@keyframes bob{0%,100%{transform:translate(-50%,0);}50%{transform:translate(-50%,8px);}}
+
+/* ---------- section headers ---------- */
+.floor-tag{display:inline-flex;align-items:center;gap:10px;font-family:'JetBrains Mono',monospace;
+  font-size:12px;letter-spacing:.25em;color:var(--gold);text-transform:uppercase;margin-bottom:18px;}
+.floor-tag .ln{width:34px;height:1px;background:var(--gold);}
+h2.sec-title{font-size:clamp(32px,4.2vw,54px);font-weight:800;line-height:1.15;margin-bottom:18px;}
+.sec-lead{color:var(--mist);font-size:17px;max-width:640px;line-height:1.9;margin-bottom:50px;}
+
+/* ---------- glass card ---------- */
+.card{
+  background:var(--glass);border:1px solid var(--glass-brd);border-radius:18px;
+  backdrop-filter:blur(16px);padding:28px;position:relative;overflow:hidden;
+  transition:transform .4s ease, border-color .4s ease;
+}
+.card::before{content:"";position:absolute;top:0;right:0;width:100%;height:1px;
+  background:linear-gradient(90deg,transparent,var(--sky),transparent);opacity:.5;}
+.card:hover{transform:translateY(-4px);border-color:rgba(63,182,255,0.4);}
+
+/* ---------- executive stats grid ---------- */
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;}
+@media (max-width:900px){.stat-grid{grid-template-columns:repeat(2,1fr);}}
+.stat-card{padding:30px 24px;}
+.stat-card .icon{font-size:22px;margin-bottom:16px;opacity:.8;}
+.stat-card .val{font-family:'JetBrains Mono',monospace;font-size:32px;font-weight:700;color:var(--white);}
+.stat-card .val span{color:var(--sky-2);}
+.stat-card .lbl{margin-top:10px;font-size:13.5px;color:var(--mist);}
+.stat-card .delta{margin-top:12px;font-size:12px;color:var(--up);font-family:'JetBrains Mono',monospace;}
+
+/* ---------- two col layout ---------- */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:stretch;}
+@media (max-width:900px){.two-col{grid-template-columns:1fr;}}
+.chart-card{padding:32px;min-height:340px;}
+.chart-card h3{font-size:16px;font-weight:700;margin-bottom:6px;}
+.chart-card p.sub{color:var(--mist);font-size:13px;margin-bottom:20px;}
+
+/* ---------- table ---------- */
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:14px;}
+th{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;color:var(--sky-2);
+   text-transform:uppercase;text-align:right;padding:12px 14px;border-bottom:1px solid var(--glass-brd);}
+td{padding:14px;border-bottom:1px solid rgba(255,255,255,0.05);color:var(--mist);}
+tr:hover td{color:var(--white);background:rgba(63,182,255,0.04);}
+td.num, th.num{font-family:'JetBrains Mono',monospace;text-align:left;}
+
+/* ---------- maintenance highlight ---------- */
+.mx-wrap{display:grid;grid-template-columns:1.1fr 0.9fr;gap:28px;}
+@media (max-width:900px){.mx-wrap{grid-template-columns:1fr;}}
+.margin-ring{position:relative;width:220px;height:220px;margin:0 auto;}
+.valuation-row{display:flex;justify-content:space-between;padding:16px 0;border-bottom:1px solid rgba(255,255,255,0.06);}
+.valuation-row:last-child{border-bottom:none;}
+.valuation-row .tag{font-size:13px;color:var(--mist);}
+.valuation-row .v{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--sky-2);}
+
+/* ---------- SWOT ---------- */
+.swot-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+@media (max-width:800px){.swot-grid{grid-template-columns:1fr;}}
+.swot-card h4{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.15em;margin-bottom:14px;}
+.swot-card.s{border-color:rgba(87,217,163,0.35);} .swot-card.s h4{color:var(--up);}
+.swot-card.w{border-color:rgba(217,106,106,0.3);} .swot-card.w h4{color:#e08a8a;}
+.swot-card.o{border-color:rgba(63,182,255,0.35);} .swot-card.o h4{color:var(--sky-2);}
+.swot-card.t{border-color:rgba(217,180,106,0.3);} .swot-card.t h4{color:var(--gold);}
+.swot-card ul{list-style:none;}
+.swot-card li{font-size:13.5px;color:var(--mist);padding:6px 0;padding-right:16px;position:relative;line-height:1.6;}
+.swot-card li::before{content:"—";position:absolute;right:0;color:inherit;opacity:.5;}
+
+/* ---------- org chart ---------- */
+.org{display:flex;flex-direction:column;align-items:center;gap:0;}
+.org-ceo{padding:18px 40px;text-align:center;}
+.org-line{width:1px;height:34px;background:var(--glass-brd);}
+.org-hline{height:1px;background:var(--glass-brd);}
+.org-row{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-top:10px;}
+.org-node{padding:14px 20px;font-size:13px;text-align:center;min-width:120px;}
+.org-node .t{font-weight:700;font-size:13.5px;}
+.org-node .s{font-size:11px;color:var(--mist);margin-top:3px;}
+
+/* ---------- growth strategy list ---------- */
+.strategy-list{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+@media (max-width:800px){.strategy-list{grid-template-columns:1fr;}}
+.strategy-item{display:flex;align-items:flex-start;gap:16px;padding:20px;}
+.strategy-item .idx{font-family:'JetBrains Mono',monospace;font-size:20px;color:var(--sky);opacity:.5;font-weight:700;}
+.strategy-item .txt h5{font-size:14.5px;font-weight:700;margin-bottom:4px;}
+.strategy-item .txt p{font-size:12.5px;color:var(--mist);line-height:1.6;}
+
+/* ---------- CTA / closing ---------- */
+.cta-sec{text-align:center;padding-top:100px;padding-bottom:160px;}
+.cta-sec h2{font-size:clamp(30px,5vw,58px);font-weight:800;margin-bottom:20px;}
+.cta-sec p{color:var(--mist);max-width:600px;margin:0 auto 40px;line-height:1.9;}
+.cta-btn{display:inline-flex;align-items:center;gap:12px;padding:18px 38px;border-radius:100px;
+  background:linear-gradient(120deg,var(--sky),#2a8fd6);color:var(--navy-deep);font-weight:700;
+  font-size:15px;text-decoration:none;box-shadow:0 10px 40px rgba(63,182,255,0.35);
+  transition:transform .3s ease;}
+.cta-btn:hover{transform:translateY(-3px);}
+.valuation-band{display:flex;justify-content:center;gap:60px;margin-top:70px;flex-wrap:wrap;}
+.vband{text-align:center;}
+.vband .v{font-family:'JetBrains Mono',monospace;font-size:38px;font-weight:800;color:var(--gold);}
+.vband .l{font-size:12px;color:var(--mist);margin-top:6px;letter-spacing:.1em;}
+
+footer{text-align:center;padding:40px 6vw 60px;color:var(--mist);font-size:12px;position:relative;z-index:1;
+  border-top:1px solid var(--glass-brd);}
+
+.reveal{opacity:0;transform:translateY(30px);transition:opacity .8s ease, transform .8s ease;}
+.reveal.in{opacity:1;transform:translateY(0);}
+</style>
+</head>
+<body>
+
+<div class="bg-glow"></div>
+<div class="grid-lines"></div>
+<div class="door door-left"></div>
+<div class="door door-right"></div>
+
+<nav class="floor-nav" id="floorNav">
+  <div class="shaft"></div>
+</nav>
+
+<!-- ================= HERO ================= -->
+<section class="hero" id="f0">
+  <div class="eyebrow">SMOU GROUP — CONFIDENTIAL</div>
+  <h1>SMOU<br>GROUP</h1>
+  <div class="tagline">Experience Makes The Difference</div>
+  <div class="divider-word">عرض الاستحواذ الاستثماري · مصاعد وتكييف · دولة الإمارات</div>
+  <div class="hero-stats">
+    <div class="hstat"><div class="n">+14</div><div class="l">سنة خبرة</div></div>
+    <div class="hstat"><div class="n">8</div><div class="l">فروع في الإمارات</div></div>
+    <div class="hstat"><div class="n">+1300</div><div class="l">عميل وشريك</div></div>
+    <div class="hstat"><div class="n num">22.98M</div><div class="l">إيرادات AED · 2025</div></div>
+  </div>
+  <div class="scroll-cue">اسحب للأسفل ↓ استكشف الطوابق</div>
+</section>
+
+<!-- ================= FLOOR 1 — OVERVIEW ================= -->
+<section id="f1">
+  <div class="floor-tag"><span class="ln"></span> الطابق ٠١ — نظرة عامة على الفرصة</div>
+  <h2 class="sec-title reveal">فرصة استحواذ في قطاع<br>يتوسع باستمرار</h2>
+  <p class="sec-lead reveal">سمو جروب شركة إماراتية متكاملة في تجارة وتركيب وصيانة المصاعد وأنظمة التكييف، بموديل عمل قابل للتوسع يجمع بين إيرادات المشاريع وإيرادات الصيانة الدورية المتكررة.</p>
+
+  <div class="stat-grid">
+    <div class="card stat-card reveal">
+      <div class="icon">🏢</div>
+      <div class="val">8 <span>فروع</span></div>
+      <div class="lbl">دبي، الشارقة، أبوظبي، العين، رأس الخيمة وغيرها</div>
+    </div>
+    <div class="card stat-card reveal">
+      <div class="icon">🛗</div>
+      <div class="val num">1,650<span>+</span></div>
+      <div class="lbl">مشروع مصاعد منفذ منذ التأسيس</div>
+    </div>
+    <div class="card stat-card reveal">
+      <div class="icon">🔧</div>
+      <div class="val num">600<span>+</span></div>
+      <div class="lbl">وحدة تحت عقود الصيانة السنوية</div>
+    </div>
+    <div class="card stat-card reveal">
+      <div class="icon">🤝</div>
+      <div class="val num">900<span>+</span></div>
+      <div class="lbl">استشاري ومقاول ضمن شبكة العمل</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FLOOR 2 — FINANCIALS ================= -->
+<section id="f2">
+  <div class="floor-tag"><span class="ln"></span> الطابق ٠٢ — الأداء المالي</div>
+  <h2 class="sec-title reveal">نمو مالي ثابت على مدار ثلاث سنوات</h2>
+  <p class="sec-lead reveal">الإيرادات ارتفعت من 17.45 مليون درهم في 2023 إلى 22.98 مليون درهم في 2025، مع تحسن مستمر في هامش الربح التشغيلي وصافي الأرباح.</p>
+
+  <div class="two-col">
+    <div class="card chart-card reveal">
+      <h3>الإيرادات وصافي الربح (AED مليون)</h3>
+      <p class="sub">2023 – 2025</p>
+      <canvas id="finChart" height="220"></canvas>
+    </div>
+    <div class="card chart-card reveal">
+      <h3>المركز المالي الختامي 2025</h3>
+      <p class="sub">إجمالي الأصول مقابل الالتزامات وحقوق الملكية</p>
+      <div class="table-wrap">
+        <table>
+          <tr><td>إجمالي الأصول</td><td class="num">20,428,525</td></tr>
+          <tr><td>إجمالي حقوق الملكية</td><td class="num">5,272,731</td></tr>
+          <tr><td>صافي الربح 2025</td><td class="num" style="color:var(--up)">2,085,833</td></tr>
+          <tr><td>هامش الربح الإجمالي</td><td class="num" style="color:var(--sky-2)">~38%</td></tr>
+          <tr><td>صافي حركة النقد 2025</td><td class="num" style="color:var(--up)">+201,380</td></tr>
+          <tr><td>عدد الحركات البنكية السنوية</td><td class="num">2,636</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FLOOR 3 — SALES VOLUME ================= -->
+<section id="f3">
+  <div class="floor-tag"><span class="ln"></span> الطابق ٠٣ — حجم المبيعات</div>
+  <h2 class="sec-title reveal">نمو تصاعدي في قيمة العقود</h2>
+  <p class="sec-lead reveal">إجمالي عقود المصاعد والتكييف لعام 2025 بلغ 43.8 مليون درهم بمعدل 42 عقدًا شهريًا، مقارنة بـ 21.9 مليون درهم فقط في 2021.</p>
+
+  <div class="two-col">
+    <div class="card chart-card reveal">
+      <h3>القيمة السنوية للعقود (AED)</h3>
+      <p class="sub">مصاعد + تكييف · 2021–2025</p>
+      <canvas id="salesChart" height="230"></canvas>
+    </div>
+    <div class="card chart-card reveal">
+      <h3>توزيع المشاريع الجارية حسب الإمارة</h3>
+      <p class="sub">776 عقد · 79.9 مليون درهم</p>
+      <canvas id="emirateChart" height="230"></canvas>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FLOOR 4 — MAINTENANCE DIVISION ================= -->
+<section id="f4">
+  <div class="floor-tag"><span class="ln"></span> الطابق ٠٤ — قسم الصيانة</div>
+  <h2 class="sec-title reveal">أعلى الأقسام ربحية داخل المجموعة</h2>
+  <p class="sec-lead reveal">قسم الصيانة يحقق هامش ربح استثنائي يقارب 77% بفضل نموذج الإيرادات المتكررة عبر عقود الصيانة السنوية.</p>
+
+  <div class="mx-wrap">
+    <div class="card reveal" style="padding:36px;">
+      <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);">
+        <div>
+          <div class="val num" style="font-size:24px;">1.04M</div>
+          <div class="lbl">إيراد سنوي AED</div>
+        </div>
+        <div>
+          <div class="val num" style="font-size:24px;color:var(--up)">798K</div>
+          <div class="lbl">صافي ربح AED</div>
+        </div>
+        <div>
+          <div class="val num" style="font-size:24px;color:var(--gold)">%77</div>
+          <div class="lbl">هامش الربح</div>
+        </div>
+      </div>
+      <div style="margin-top:28px;border-top:1px solid var(--glass-brd);padding-top:24px;">
+        <p style="color:var(--mist);font-size:13.5px;line-height:2;">
+          نموذج عمل قائم على عقود صيانة سنوية، خدمات طوارئ، قطع غيار، وأعمال تحديث المصاعد — بتكلفة تشغيل منخفضة وإمكانية توسع سريعة دون زيادة نسبية في التكاليف.
+        </p>
+      </div>
+    </div>
+    <div class="card reveal" style="padding:36px;">
+      <h3 style="font-size:15px;margin-bottom:18px;">سيناريوهات التقييم — طريقة مضاعف EBITDA</h3>
+      <div class="valuation-row"><span class="tag">محافظ (×3)</span><span class="v num">2.4M AED</span></div>
+      <div class="valuation-row"><span class="tag">متوسط (×4)</span><span class="v num">3.2M AED</span></div>
+      <div class="valuation-row"><span class="tag">متفائل (×5)</span><span class="v num">4.0M AED</span></div>
+      <p style="margin-top:20px;font-size:12px;color:var(--mist);line-height:1.8;">
+        * قسم الصيانة وحده يمثل أصلًا استثماريًا قائم الذات بإمكانية بيع حصة جزئية (30–40%) أو شراكة استراتيجية بدلًا من خروج كلي.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FLOOR 5 — SWOT ================= -->
+<section id="f5">
+  <div class="floor-tag"><span class="ln"></span> الطابق ٠٥ — تحليل SWOT</div>
+  <h2 class="sec-title reveal">موقع تنافسي واضح في السوق</h2>
+  <p class="sec-lead reveal">سوق المصاعد والتكييف في الإمارات يشهد نموًا مستدامًا مدفوعًا بالتوسع العمراني، مع فرصة حقيقية أمام سمو جروب لزيادة حصتها السوقية.</p>
+
+  <div class="swot-grid">
+    <div class="card swot-card s reveal">
+      <h4>نقاط القوة</h4>
+      <ul>
+        <li>+14 سنة خبرة وسمعة قوية في السوق</li>
+        <li>محفظة كبيرة تضم +1,650 مشروع منفذ</li>
+        <li>إيراد متكرر من +600 وحدة صيانة</li>
+        <li>حلول متكاملة (مصاعد + تكييف)</li>
+        <li>شبكة استشاريين ومقاولين تتجاوز 900</li>
+      </ul>
+    </div>
+    <div class="card swot-card w reveal">
+      <h4>نقاط الضعف</h4>
+      <ul>
+        <li>اعتماد على موردين خارجيين للتصنيع</li>
+        <li>ضغط تدفق نقدي مرتبط بمراحل المشاريع</li>
+        <li>حضور محدود مقارنة بالعلامات العالمية</li>
+        <li>حساسية الهامش تجاه المنافسة السعرية</li>
+      </ul>
+    </div>
+    <div class="card swot-card o reveal">
+      <h4>الفرص</h4>
+      <ul>
+        <li>نمو مستمر في قطاع الإنشاءات بالإمارات</li>
+        <li>التوسع في أسواق دول الخليج</li>
+        <li>زيادة الطلب على عقود الصيانة الدورية</li>
+        <li>البيع التبادلي بين المصاعد والتكييف</li>
+        <li>التحول الرقمي عبر أنظمة ERP والأتمتة</li>
+      </ul>
+    </div>
+    <div class="card swot-card t reveal">
+      <h4>التهديدات</h4>
+      <ul>
+        <li>منافسة قوية من العلامات العالمية</li>
+        <li>اضطرابات سلاسل التوريد وتأثيرها على التسليم</li>
+        <li>تأخر بعض العملاء في السداد</li>
+        <li>تذبذب أسعار المواد والمعدات</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FLOOR 6 — ORG STRUCTURE ================= -->
+<section id="f6">
+  <div class="floor-tag"><span class="ln"></span> الطابق ٠٦ — الهيكل التنظيمي</div>
+  <h2 class="sec-title reveal">فريق إداري متمرس ومتكامل</h2>
+  <p class="sec-lead reveal">هيكل تنظيمي واضح يغطي جميع الوظائف الأساسية من المبيعات والمشاريع إلى المالية والموارد البشرية.</p>
+
+  <div class="card reveal" style="padding:44px 24px;">
+    <div class="org">
+      <div class="card org-ceo">
+        <div class="t" style="font-weight:800;">الرئيس التنفيذي (CEO)</div>
+      </div>
+      <div class="org-line"></div>
+      <div class="org-row">
+        <div class="card org-node"><div class="t">المدير العام (GM)</div></div>
+        <div class="card org-node"><div class="t">مدير العمليات (COO)</div></div>
+        <div class="card org-node"><div class="t">المدير المالي (CFO)</div></div>
+      </div>
+      <div class="org-line"></div>
+      <div class="org-row">
+        <div class="card org-node"><div class="t">قسم المبيعات</div><div class="s">مدراء مناطق · مشرفون · فريق مبيعات</div></div>
+        <div class="card org-node"><div class="t">قسم المشاريع</div><div class="s">مهندسون · مشرفون · فنيون</div></div>
+        <div class="card org-node"><div class="t">قسم التكييف HVAC</div><div class="s">مهندسو مبيعات وموقع</div></div>
+        <div class="card org-node"><div class="t">قسم الصيانة</div><div class="s">فنيون · مساعدون · سائقون</div></div>
+      </div>
+      <div class="org-row">
+        <div class="card org-node"><div class="t">التطوير والتسويق</div></div>
+        <div class="card org-node"><div class="t">الموارد البشرية</div></div>
+        <div class="card org-node"><div class="t">المالية والحسابات</div></div>
+        <div class="card org-node"><div class="t">المخازن والمشتريات</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FLOOR 7 — GROWTH & FORECAST ================= -->
+<section id="f7">
+  <div class="floor-tag"><span class="ln"></span> الطابق ٠٧ — التوقعات والنمو</div>
+  <h2 class="sec-title reveal">مسار نمو واضح حتى 2030</h2>
+  <p class="sec-lead reveal">بناءً على الأداء الحالي وخطط التوسع، تتوقع الشركة نموًا في الإيرادات من 22.98 مليون درهم في 2025 إلى نحو 42.4 مليون درهم بحلول 2030.</p>
+
+  <div class="two-col">
+    <div class="card chart-card reveal">
+      <h3>توقعات الإيرادات (AED مليون)</h3>
+      <p class="sub">2023 – 2030</p>
+      <canvas id="forecastChart" height="230"></canvas>
+    </div>
+    <div class="card reveal" style="padding:32px;">
+      <h3 style="font-size:16px;margin-bottom:18px;">استراتيجية النمو</h3>
+      <div class="strategy-list">
+        <div class="strategy-item"><div class="idx">01</div><div class="txt"><h5>التوسع الخليجي</h5><p>دخول أسواق جديدة ضمن دول مجلس التعاون</p></div></div>
+        <div class="strategy-item"><div class="idx">02</div><div class="txt"><h5>زيادة الحصة السوقية</h5><p>التركيز على المشاريع السكنية والتجارية</p></div></div>
+        <div class="strategy-item"><div class="idx">03</div><div class="txt"><h5>التحول الرقمي</h5><p>تطوير أنظمة ERP وربطها بمؤشرات الأداء</p></div></div>
+        <div class="strategy-item"><div class="idx">04</div><div class="txt"><h5>تعزيز شبكة الموردين</h5><p>شراكات أعمق مع الموردين العالميين</p></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CLOSING / CTA ================= -->
+<section class="cta-sec" id="f8">
+  <div class="floor-tag" style="justify-content:center;"><span class="ln"></span> الطابق ٠٨ — فرصة الاستثمار</div>
+  <h2 class="reveal">استثمار قابل للتوسع بعائد مجدٍ</h2>
+  <p class="reveal">نموذج عمل قابل للتوسع، إيرادات متكررة من الصيانة، وقاعدة عملاء راسخة تتجاوز 1,300 عميل — فرصة جاهزة للنمو الإقليمي بدعم استثماري مناسب.</p>
+
+  <div class="valuation-band reveal">
+    <div class="vband"><div class="v">20–25M</div><div class="l">AED · التقييم التقديري</div></div>
+    <div class="vband"><div class="v">18–25%</div><div class="l">العائد المتوقع ROI</div></div>
+    <div class="vband"><div class="v num">%56</div><div class="l">هامش ربح المشاريع المكتملة</div></div>
+  </div>
+</section>
+
+<footer>
+  SMOU GROUP — Experience Makes The Difference · وثيقة استثمارية سرية · دبي، الإمارات العربية المتحدة
+</footer>
+
+<script>
+Chart.defaults.font.family = "'JetBrains Mono', monospace";
+Chart.defaults.color = "rgba(244,248,252,0.55)";
+const sky="#3fb6ff", sky2="#7fd4ff", gold="#d9b46a", up="#57d9a3";
+
+function gridOpts(){
+  return {
+    grid:{color:"rgba(255,255,255,0.06)"},
+    ticks:{font:{size:11}}
+  };
+}
+
+new Chart(document.getElementById('finChart'), {
+  type:'bar',
+  data:{
+    labels:['2023','2024','2025'],
+    datasets:[
+      {label:'الإيرادات', data:[17.45,19.04,22.99], backgroundColor:'rgba(63,182,255,0.55)', borderRadius:6, order:2},
+      {label:'صافي الربح', data:[1.21,0.92,2.09], type:'line', borderColor:gold, backgroundColor:gold, tension:.4, order:1, pointRadius:4}
+    ]
+  },
+  options:{
+    responsive:true,
+    plugins:{legend:{labels:{boxWidth:12,font:{size:11}}}},
+    scales:{ x:gridOpts(), y:gridOpts() }
+  }
+});
+
+new Chart(document.getElementById('salesChart'), {
+  type:'bar',
+  data:{
+    labels:['2021','2022','2023','2024','2025'],
+    datasets:[{label:'AED', data:[21950761,18973210,26375729,31263961,43847520],
+      backgroundColor:(ctx)=>{
+        const g=ctx.chart.ctx.createLinearGradient(0,0,0,220);
+        g.addColorStop(0,'rgba(63,182,255,0.85)'); g.addColorStop(1,'rgba(63,182,255,0.15)');
+        return g;
+      }, borderRadius:6}]
+  },
+  options:{
+    responsive:true,
+    plugins:{legend:{display:false}},
+    scales:{ x:gridOpts(), y:{...gridOpts(), ticks:{callback:v=>(v/1e6)+'M', font:{size:11}}} }
+  }
+});
+
+new Chart(document.getElementById('emirateChart'), {
+  type:'doughnut',
+  data:{
+    labels:['أبوظبي','الشارقة','دبي','العين','رأس الخيمة','أخرى'],
+    datasets:[{data:[32056024,15272677,14400152,8430271,6582166,3154523],
+      backgroundColor:[sky,sky2,gold,up,'#8b6cd1','rgba(255,255,255,0.25)'],
+      borderColor:'#0a1728', borderWidth:3}]
+  },
+  options:{
+    responsive:true,
+    plugins:{legend:{position:'bottom', labels:{boxWidth:10,font:{size:10}, color:'rgba(244,248,252,0.7)'}}}
+  }
+});
+
+new Chart(document.getElementById('forecastChart'), {
+  type:'line',
+  data:{
+    labels:['2023','2024','2025','2026','2027','2028','2029','2030'],
+    datasets:[{label:'AED مليون', data:[17,19,22,25,28,32,37,42],
+      borderColor:sky2, backgroundColor:'rgba(63,182,255,0.12)', fill:true, tension:.4, pointRadius:3, pointBackgroundColor:gold}]
+  },
+  options:{
+    responsive:true,
+    plugins:{legend:{display:false}},
+    scales:{ x:gridOpts(), y:gridOpts() }
+  }
+});
+
+// scroll reveal
+const reveals = document.querySelectorAll('.reveal');
+const io = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); } });
+},{threshold:0.15});
+reveals.forEach(el=>io.observe(el));
+
+// floor nav
+const floors = ['f0','f1','f2','f3','f4','f5','f6','f7','f8'];
+const nav = document.getElementById('floorNav');
+floors.forEach((id,i)=>{
+  const b=document.createElement('div');
+  b.className='floor-btn';
+  b.textContent= i===0 ? 'G' : i;
+  b.onclick=()=>document.getElementById(id).scrollIntoView({behavior:'smooth'});
+  nav.appendChild(b);
+});
+const btns = nav.querySelectorAll('.floor-btn');
+const io2 = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      const idx = floors.indexOf(e.target.id);
+      btns.forEach(b=>b.classList.remove('active'));
+      if(btns[idx]) btns[idx].classList.add('active');
+    }
+  });
+},{threshold:0.5});
+floors.forEach(id=>io2.observe(document.getElementById(id)));
+
+// remove doors from flow after animation
+setTimeout(()=>{document.querySelectorAll('.door').forEach(d=>d.style.pointerEvents='none');},2200);
+</script>
+</body>
+</html>
